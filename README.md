@@ -1,50 +1,71 @@
-Kudos bot for engagementThis bot identifies 5 top users who commented in threads and 2 top users who reacted the most on posts/threads in public channels which have 50+ audience. After identifying, it sends them a short Kudos message in their Kudos bot DM.
-This helps us to encourage more users to contribute to posts and threads and attempt to make the community more responsive and transparent.
+# Rename Channels 
+
+This script uses the Slack API to perform operations on Slack channels. It includes two main functions: `add_prefix_to_channel` and `rename_channels` which is used for renaming the channels.
+Call whichever function you need, as per your requirement. This script is not deployed in cloud and is to be run on prem on an adhoc basis.
+
+This script is to be used only by Slack Admin team (not for end users)
 
 
-Prerequisites
-
+## Prerequisites
 
 * Slack Application
 * Python 3.12
-* requests library
 * slack_sdk library
-* numpy library
-* google-cloud-secret-managerlibrary
-* ratelimitlibrary
-
-Slack Application
-
-Here we are using slack app Kudos Bot and contact Engineering Collaboration team if you may have any questions
-
-Methods used in the app:
-
-* conversations.replies
-* conversations.history
-* conversations.list
-* chat.postMessage
-
-Environment variables
-
-Ensure the following secrets are set in Google cloud secret manager:
-
-* SLACK_TOKEN : User tokens represent workspace members. They are issued for the user who installed the app and for users who authenticate the app
-* SLACK_BOT_TOKEN : Bot tokens represent a bot associated with an app installed in a workspace. Unlike user tokens, they're not tied to a user's identity—they're only tied to your app. Since acting independently allows your app to stay installed even when an installing user is deactivated, using bot tokens is usually for the best.
 
 
-Ensure the following secrets are set in code with correct project id and token name from GCP:
+## Environment variables
 
-* SLACK_USER_TOKEN_NAME : Token name used to store SLACK_TOKEN
-* SLACK_BOT_TOKEN_NAME : Token name used to store SLACK_BOT_TOKEN_NAME.
-* GCP_PROJ_ID : This is project ID and NOT project name. You can pick from Project details or from URL.
+* token : To generate a Slack API token, you'll need to create a Slack app within Slack and configure it with the appropriate permissions for your use case. Install the App to Your Workspace and after the app is installed to the workspace, the OAuth Access Token can be copied from the "OAuth & Permissions" page.
 
 
+## How to run the script
 
-Usage 
+1. Save the Script to a file named `rename_channels.py`.
+2. Install Dependencies: 
+  Ensure you have the `slack_sdk` library installed. You can install it using the following command:
+  pip install slack_sdk
+3. Add Your Slack Token in the script. Replace the placeholder token="" with your actual Slack API token.
+4. Run the Script: Open a terminal or command prompt, navigate to the directory where
+  `rename_channels.py` is located, and run the script using the following command
+  python rename_channels.py
 
-This script is scheduled using Google scheduler with below frequency where it identifies users and send messages in their Kudos Bot DM
 
+## How it works
 
+1. Imports and Initialization:
+    - `import slack`: Imports the Slack SDK.
+    - `token=""`: Placeholder for the Slack API token.
+    - `slack_client = slack.WebClient(token=token)`: Initializes the Slack client with the provided 
+        token.
 
-How it works
+2. Function: `add_prefix_to_channel`:
+    - Purpose: Adds a prefix to the names of all public channels with members.
+    - Steps:
+        a. Define `prefix` and `text` variables.
+        b. Fetch a list of public channels using `slack_client.conversations_list`.
+        c. Check if the API call was successful (`conversations.get('ok')`).
+        d. Iterate over each channel in the list.
+        e. If the channel has members (`channel['num_members'] is not 0`):
+            - Create a new name by adding the prefix to the current channel name.
+           - Print the old and new channel names.
+           - Join the channel using `slack_client.conversations_join`.
+           - Rename the channel using `slack_client.conversations_rename`.
+           - Post a message to the channel using `slack_client.chat_postMessage`.
+           - Leave the channel using `slack_client.conversations_leave`.
+
+3. Function: `rename_channels`:
+    - Purpose: Renames channels by replacing a specific substring in their names.
+    - Steps:
+        a. Define `string_to_be_replaced` and `string_to_be_replaced_with` variables.
+        b. Fetch a list of public channels using `slack_client.conversations_list`.
+        c. Check if the API call was successful (`conversations.get('ok')`).
+        d. Iterate over each channel in the list.
+        e. If the channel name starts with the specified substring
+            (`channel['name'].startswith(string_to_be_replaced)`):
+            - Create a new name by replacing the substring in the current channel name.
+            - Print the old and new channel names.
+            - Join the channel using `slack_client.conversations_join`.
+            - Rename the channel using `slack_client.conversations_rename`.
+            - Leave the channel using `slack_client.conversations_leave`.
+
 
