@@ -30,6 +30,7 @@ This script is to be used only by Slack Admin team (not for end users)
   python rename_channels.py
 
 
+
 ## How it works
 
 1. Imports and Initialization:
